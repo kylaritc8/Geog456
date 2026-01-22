@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kyla's Leaflet Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+</head>
+<body>
+    
+    <div id="mapid"></div>
+    <style>
+        #mapid{ width: 1000px; height: 600px}
+    </style>
+
+    <script>
+        var map = L.map('mapid').setView([-32.85, 147.25], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        
+        
+        var UOWicon = L.icon({   
+        iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0mMEvic3TylBsYaPykej9Wmf-71DpJpVGyw&s',   
+        iconSize: [50,50], 
+        popupAnchor: [0,0]  
+        });
+
+        L.marker([-34.4053,150.8778], {icon: UOWicon}).addTo(map) //icon isn't working
+        .bindPopup("This is where I studied abroad last semester!<br/><img src='https://images.accommodationforstudents.com/website/university-guides/au/university-of-wollongong/uni.jpg' width='250px' />")
+        .openPopup();
+    
+
+
+    </script>
+
+
+
+</body>
+</html>

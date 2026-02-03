@@ -1,4 +1,4 @@
-var kristy={"type": "FeatureCollection",
+var kristy ={"type": "FeatureCollection",
 "name": "Kristy_pts_GeoJSON",
 "features": [
 { "type": "Feature", "properties": { "STORMNAME": "INVEST", "DTG": 2018080618.0, "YEAR": 2018.0, "MONTH": "08", "DAY": 6.0, "HHMM": "1800", "MSLP": 1005.0, "BASIN": "ep", "STORMNUM": 13.0, "STORMTYPE": "TD", "INTENSITY": 30.0, "SS": 0.0, "LAT": 14.8, "LON": -122.6 }, "geometry": { "type": "Point", "coordinates": [ -122.6, 14.8 ] } },

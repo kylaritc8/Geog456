@@ -20,7 +20,11 @@
 
     <script>
         var map = L.map('mapid', {zoomSnap: 0.25}).setView([38.8283, -96.5], 4.5);
-       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+       
+       var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {});
+
+       var ESRI = L.tileLayer ('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}',{});
+
 
        var parkIcon = L.icon({   
         iconUrl: 'https://www.nps.gov/cabr/blogs/images/Arrowhead_3.png',   
@@ -28,10 +32,27 @@
         popupAnchor: [0,0] 
         });
 
-        L.geoJSON(np, {  
+        //look at 1/29 -> data -> 5_storm for individual popups
+
+        var npGeoJSON = L.geoJSON(np, {  
         pointToLayer: function (feature, latlng) {
-        return L.marker(latlng, {icon: parkIcon});}}) 
-        .addTo(map);
+        return L.marker(latlng, {icon: parkIcon})
+        .bindPopup(feature.properties.NAME)}});
+
+        var baseMaps = {
+        "OpenStreetMap": osm,
+        "PhysicalMap": ESRI
+        };
+
+        var overlayMaps = {
+        "National Parks": npGeoJSON
+        };
+
+        var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+        osm.addTo(map)
+        npGeoJSON.addTo(map)
+
     </script>
     
 </body>

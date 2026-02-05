@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>National Parks I've Been To!</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+     <script src="./np.js"></script>
+</head>
+<body>
+    <div id="mapid"></div>
+    <style>
+        #mapid{ width: 1000px; height: 500px}
+    </style>
+
+    <script>
+        var map = L.map('mapid', {zoomSnap: 0.25}).setView([38.8283, -96.5], 4.5);
+       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+
+       var parkIcon = L.icon({   
+        iconUrl: 'https://www.nps.gov/cabr/blogs/images/Arrowhead_3.png',   
+        iconSize: [25,25], 
+        popupAnchor: [0,0] 
+        });
+
+        L.geoJSON(np, {  
+        pointToLayer: function (feature, latlng) {
+        return L.marker(latlng, {icon: parkIcon});}}) 
+        .addTo(map);
+    </script>
+    
+</body>
+</html>

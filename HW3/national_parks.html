@@ -32,8 +32,6 @@
         popupAnchor: [0,0] 
         });
 
-        //look at 1/29 -> data -> 5_storm for individual popups
-
         var npGeoJSON = L.geoJSON(np, {  
         pointToLayer: function (feature, latlng) {
         return L.marker(latlng, {icon: parkIcon})

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Disturbance</title>
+    
+</head>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    td, th {
+        border: 1px solid #ffffff;
+        text-align: left;
+        padding: 8px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+
+</style>
+
+<body>
+    <table id="disturbance_table">
+        <tr> 
+            <th>Trail</th>
+            <th>Survey Year</th>
+        </tr>
+    </table>   
+    
+    <script src="./disturbance.js"></script>
+    
+    <script>
+        var myTable = document.getElementById("disturbance_table")
+
+        function distTable(feature){
+            var myNewRow = document.createElement('tr');
+            var myNewCell1 = document.createElement('td');
+            var myNewCell2 = document.createElement('td');
+            myNewCell1.innerHTML = feature.properties.TRAIL;
+            myNewCell2.innerHTML = feature.properties.SURVEY_YEAR; 
+            myNewCell2.style.backgroundColor =
+                getBackgroundColor(feature.properties.SURVEY_YEAR);
+            myNewRow.append(myNewCell1);
+            myNewRow.append(myNewCell2);
+            myTable.append(myNewRow);
+        }
+
+        data.features.forEach(e => distTable(e))
+
+        function getBackgroundColor(d){
+            return d > 1976 ? 'yellow' : 'gray';
+        }
+
+     
+       
+    </script>
+</body>
+</html>

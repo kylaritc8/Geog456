@@ -16,19 +16,225 @@
      <div id="mapid"></div>
     <style>
         #mapid{ width: 1000px; height: 500px}
+
+        .leaflet-tile {
+        transition: opacity 0.4s ease;
+        }
+        .slider-labels {
+            width: 500px;              /* match your map width */
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 
-<script>
+        <input id="myRange" type="range" name="season"
+            value="0" min="0" max="6" style="width:500px"
+            oninput="moveSlider(this.value)">
 
-    var map = L.map('mapid', {zoomSnap: 0.25}).setView([33.5, -84.0], 5);
+        <div class="slider-labels">
+            <span>1900</span>
+            <span>1920</span>
+            <span>1940</span>
+            <span>1960</span>
+            <span>1980</span>
+            <span>2000</span>
+            <span>2025</span>
+        </div>
 
-    var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+    <script>
 
-    var prismLayer = L.tileLayer('tmean/1900tiles/{z}/{x}/{y}.png', {
-    attribution: 'PRISM Climate Group',
-    opacity: 0.9
-    }).addTo(map); 
-</script>  
+        var map = L.map('mapid', {zoomSnap: 0.25}).setView([33.5, -84.0], 5);
+
+        var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+
+
+    //IMPORT LAYERS
+    //MAXs
+        var Tmax2025 = L.tileLayer('tmax/2025tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+        
+        var Tmax2000 = L.tileLayer('tmax/2000tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmax1980 = L.tileLayer('tmax/1980tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmax1960 = L.tileLayer('tmax/1960tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmax1940 = L.tileLayer('tmax/1940tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmax1920 = L.tileLayer('tmax/1920tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmax1900 = L.tileLayer('tmax/1900tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+    //MEANS
+        var Tmean2025 = L.tileLayer('tmean/2025tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmean2000 = L.tileLayer('tmean/2000tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmean1980 = L.tileLayer('tmean/1980tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmean1960 = L.tileLayer('tmean/1960tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmean1940 = L.tileLayer('tmean/1940tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var Tmean1920 = L.tileLayer('tmean/1920tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+   
+        var Tmean1900 = L.tileLayer('tmean/1900tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+    //PPT
+        var ppt2025 = L.tileLayer('ppt/2025tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var ppt2000 = L.tileLayer('ppt/2000tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var ppt1980 = L.tileLayer('ppt/1980tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var ppt1960 = L.tileLayer('ppt/1960tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var ppt1940 = L.tileLayer('ppt/1940tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+        var ppt1920 = L.tileLayer('ppt/1920tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+   
+        var ppt1900 = L.tileLayer('ppt/1900tiles/{z}/{x}/{y}.png', {
+        attribution: 'PRISM Climate Group',
+        opacity: 0.9
+        }); 
+
+
+        //
+
+        var layers = {
+            tMean: [Tmean1900, Tmean1920, Tmean1940, Tmean1960, Tmean1980, Tmean2000, Tmean2025],
+            tMax: [Tmax1900, Tmax1920, Tmax1940, Tmax1960, Tmax1980, Tmax2000, Tmax2025],
+            PPT: [ppt1900, ppt1920, ppt1940, ppt1960, ppt1980, ppt2000, ppt2025]
+        };
+
+        var activeLayers = {
+            tMean: false,
+            tMax: false,
+            PPT: false
+        };
+
+        var currentIndex = 0;
+
+        var overlayMaps = {
+            "Mean Temperature": L.layerGroup(),
+            "Max Temperature": L.layerGroup(),
+            "Precipitation": L.layerGroup()
+        };
+
+        var layerControl = L.control.layers(null, overlayMaps).addTo(map);
+
+        map.on('overlayadd', function(e){
+            if (e.name === "Mean Temperature") {activeLayers.tMean = true;
+                layers.tMean.forEach((layer, i) => {
+                layer.addTo(map);
+                layer.setOpacity(i === currentIndex ? 1 : 0);
+                 });
+            }
+            if(e.name === "Max Temperature") {activeLayers.tMax = true;
+                layers.tMax.forEach((layer, i) => {
+                layer.addTo(map);
+                layer.setOpacity(i === currentIndex ? 1 : 0);
+                });
+            }
+
+            if(e.name === "Precipitation") {activeLayers.PPT = true;
+                layers.PPT.forEach((layer, i) => {
+                layer.addTo(map);
+                layer.setOpacity(i === currentIndex ? 1 : 0);
+                });
+            }
+        });
+
+        map.on('overlayremove', function(e){
+            if(e.name === "Mean Temperature") {activeLayers.tMean = false;
+                layers.tMean.forEach(layer => map.removeLayer(layer));
+            }
+            if(e.name === "Max Temperature") {activeLayers.tMax = false;
+                layers.tMax.forEach(layer => map.removeLayer(layer));
+            }
+
+            if(e.name === "Precipitation") {activeLayers.PPT = false;
+                layers.PPT.forEach(layer => map.removeLayer(layer));
+            }
+        });
+
+    
+    function moveSlider(value){
+    value = Number(value);
+    currentIndex = value;
+
+    Object.keys(layers).forEach(function(key){
+        if (activeLayers[key]) {
+            layers[key].forEach(function(layer, index){
+                layer.setOpacity(index === value ? 1 : 0);
+            });
+        }
+    });
+}
+    </script>  
 
 
 </body>

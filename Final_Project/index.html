@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
-     <script></script>
+     <scriptsrc="mushrooms.js"></script>
 </head>
 <body>
      <div id="mapid"></div>
@@ -26,6 +26,18 @@
             justify-content: space-between;
             font-size: 12px;
             margin-top: 5px;
+        }
+        .legend {
+            background: white;
+            padding: 6px;
+            line-height: 18px;
+        }
+
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
         }
     </style>
 
@@ -50,7 +62,7 @@
         var osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
 
 
-    //IMPORT LAYERS
+//IMPORT LAYERS
     //MAXs
         var Tmax2025 = L.tileLayer('tmax/2025tiles/{z}/{x}/{y}.png', {
         attribution: 'PRISM Climate Group',
@@ -162,7 +174,7 @@
         }); 
 
 
-        //
+    // Variables
 
         var layers = {
             tMean: [Tmean1900, Tmean1920, Tmean1940, Tmean1960, Tmean1980, Tmean2000, Tmean2025],
@@ -184,6 +196,7 @@
             "Precipitation": L.layerGroup()
         };
 
+    // Layer Control
         var layerControl = L.control.layers(null, overlayMaps).addTo(map);
 
         map.on('overlayadd', function(e){
@@ -191,12 +204,14 @@
                 layers.tMean.forEach((layer, i) => {
                 layer.addTo(map);
                 layer.setOpacity(i === currentIndex ? 1 : 0);
+                updateLegend(colors, labels, "°F");
                  });
             }
             if(e.name === "Max Temperature") {activeLayers.tMax = true;
                 layers.tMax.forEach((layer, i) => {
                 layer.addTo(map);
                 layer.setOpacity(i === currentIndex ? 1 : 0);
+                updateLegend(colors, labels, "°F");
                 });
             }
 
@@ -204,6 +219,7 @@
                 layers.PPT.forEach((layer, i) => {
                 layer.addTo(map);
                 layer.setOpacity(i === currentIndex ? 1 : 0);
+                updateLegend(color_reversed, labels, "in.");
                 });
             }
         });
@@ -211,29 +227,65 @@
         map.on('overlayremove', function(e){
             if(e.name === "Mean Temperature") {activeLayers.tMean = false;
                 layers.tMean.forEach(layer => map.removeLayer(layer));
+                
             }
             if(e.name === "Max Temperature") {activeLayers.tMax = false;
                 layers.tMax.forEach(layer => map.removeLayer(layer));
+                
             }
 
             if(e.name === "Precipitation") {activeLayers.PPT = false;
                 layers.PPT.forEach(layer => map.removeLayer(layer));
+                
+            }
+
+            if (!activeLayers.tMean && !activeLayers.tMax && !activeLayers.PPT) {
+                legend._div.innerHTML = "";
             }
         });
 
-    
-    function moveSlider(value){
-    value = Number(value);
-    currentIndex = value;
+    // Slider
+        function moveSlider(value){
+            value = Number(value);
+            currentIndex = value;
 
-    Object.keys(layers).forEach(function(key){
-        if (activeLayers[key]) {
-            layers[key].forEach(function(layer, index){
-                layer.setOpacity(index === value ? 1 : 0);
-            });
+        Object.keys(layers).forEach(function(key){
+            if (activeLayers[key]) {
+                layers[key].forEach(function(layer, index){
+                    layer.setOpacity(index === value ? 1 : 0);
+                });
+            }
+        });
         }
-    });
-}
+
+
+    //Legend
+        var colors= ["#2b83ba", "#4696b5", "#61a9b1", "#7cbcac", "#97cfa7", "#afdfa5", "#c1e6ab", "#d3edb1", "#e4f4b6", "#f6fbbc", "#fff6b5", "#fee5a1", "#fed48e", "#fec37a", "#fdb266", "#f79656", "#ef7748", "#e75839", "#df382b", "#d7191c"];
+        var color_reversed = colors.slice().reverse();
+        var labels= ['0-5', '5-10', '10-15', '15-20', '20-25', '25-30', '30-35', '35-40', '40-45', '45-50', '50-55', '55-60', '60-65', '65-70', '70-75', '75-80', '80-85', '85-90', '90-95', '95-100'];
+        
+        var legend = L.control({ position: "bottomright" });
+
+        legend.onAdd = function (map) {
+            this._div = L.DomUtil.create("div", "info legend");
+            return this._div;
+        };
+
+        legend.addTo(map);
+
+        function updateLegend(colors, labels, unit) {
+            let div = legend._div;
+            div.innerHTML = ""; // clear old legend
+
+            for (let i = 0; i < colors.length; i++) {
+                div.innerHTML +=
+                    '<i style="background:' + colors[i] + '"></i> ' +
+                    labels[i] + unit+ '<br>';
+            }
+        }
+
+
+       
     </script>  
 
 

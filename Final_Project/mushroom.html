@@ -12,7 +12,48 @@
     <style>
         body { margin: 0; background: #f5f0e8; color: #333; font-family: Georgia, serif; }
 
-        #mapid { width: 50%; height: 88vh; }
+        #main {
+        display: flex;
+        width: 100vw;
+        height: 88vh;
+        }
+
+        #mapid {
+            width: 70%;
+            height: 100%;
+        }
+
+        #table-container {
+            width: 30%;
+            height: 100%;
+            overflow-y: auto;
+            background: #f5f0e8;
+            border-left: 1px solid #ccc;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        #table-container h3 {
+            margin-top: 0;
+            color: #7a5c2e;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 4px;
+            text-align: left;
+        }
+
+        th {
+            position: sticky;
+            top: 0;
+            background: #f5f0e8;
+        }
 
         #controls {
             padding: 10px 24px;
@@ -74,8 +115,15 @@
     <span id="info">1899 &nbsp;|&nbsp; 0 records</span>
 </div>
 
-<div id="mapid"></div>
 <div id="legend"></div>
+
+<div id="main">
+    <div id="mapid"></div>
+    <div id="table-container">
+        <h3>Northernmost Latitude</h3>
+        <div id="table"></div>
+    </div>
+</div>
 
 <script>
     const speciesConfig = {
@@ -173,6 +221,9 @@
              .bindPopup(`<b><i>${props.species}</i></b><br>Year: ${props.year}<br>${props.stateProvince}`)
              .addTo(mushroomLayer);
         });
+
+        const northData = getNorthernmostBySpecies(filtered);
+            renderTable(northData);
     };
 
     window.onload = function() {
@@ -182,18 +233,36 @@
 
     //Table
     function getNorthernmostBySpecies(features) {
-    const result = {};
+        const result = {};
 
-    features.forEach(f => {
-        const species = f.properties.species;
-        const lat = f.geometry.coordinates[1];
+        features.forEach(f => {
+            const species = f.properties.species;
+            const lat = f.geometry.coordinates[1];
 
-        if (!result[species] || lat > result[species]) {
-            result[species] = lat;
-        }
-    });
+            if (!result[species] || lat > result[species]) {
+                result[species] = lat;
+            }
+        });
 
-    return result;
+        return result;
+    }
+
+    function renderTable(northData) {
+    let html = "<table>";
+    html += "<tr><th>Species</th><th>Max Lat (°)</th></tr>";
+
+    Object.entries(northData)
+        .sort((a, b) => b[1] - a[1]) // sort north → south
+        .forEach(([species, lat]) => {
+            html += `<tr>
+                        <td><i>${species}</i></td>
+                        <td>${lat.toFixed(2)}</td>
+                     </tr>`;
+        });
+
+    html += "</table>";
+
+    document.getElementById("table").innerHTML = html;
 }
 
 </script>

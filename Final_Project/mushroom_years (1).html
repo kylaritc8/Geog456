@@ -706,7 +706,7 @@ function updateClimateLayers() {
     if (idx === -1) return;
 
     climateLayers[activeClimate].forEach((layer, i) => {
-        layer.setOpacity(i === idx ? 1 : 0);
+        layer.setOpacity(i === idx ? 0.75 : 0);
     });
 }
 

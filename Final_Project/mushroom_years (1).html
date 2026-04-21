@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mushroom Movement</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+        integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"
+        integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+        crossorigin=""></script>
+    <script src="mushrooms.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+   
+   <style>
+    body {
+        margin: 0;
+        background: #f5f0e8;
+        color: #333;
+        font-family: Georgia, serif;
+    }
+
+    /* =========================
+    HEADER (if you added it)
+    ========================= */
+    #site-header {
+        width: 100%;
+        background: #f5f0e8;
+        border-bottom: 1px solid #ccc;
+        padding: 18px 24px;
+    }
+
+    #site-header h1 {
+        margin: 0 0 6px 0;
+        font-size: 1.8em;
+        color: #3a2a1a;
+    }
+
+    #site-header p {
+        margin: 0;
+        font-size: 0.9em;
+        color: #444;
+        line-height: 1.5;
+        max-width: 1100px;
+    }
+
+    /* =========================
+    MAIN LAYOUT
+    ========================= */
+    #main {
+        display: flex;
+        width: 100vw;
+        height: 88vh;
+    }
+
+    /* MAP CONTAINER */
+    #map-wrap {
+        position: relative;
+        width: 65%;
+        height: 100%;
+    }
+
+    #mapid {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* =========================
+    LEFT OVERLAYS ON MAP
+    ========================= */
+
+    /* Climate controls (top-left) */
+    #climate-controls {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(245, 240, 232, 0.95);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+        font-family: Georgia, serif;
+        font-size: 0.85em;
+    }
+
+    /* Climate legend (bottom-left) */
+    #climate-legend {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        background: rgba(245, 240, 232, 0.95);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        z-index: 1000;
+        font-size: 0.8em;
+        font-family: Georgia, serif;
+        line-height: 1.4;
+    }
+
+    /* =========================
+    MUSHROOM LEGEND (RIGHT OF MAP)
+    ========================= */
+    #species-controls {
+        width: 15%;
+        height: 100%;
+        background: #f5f0e8;
+        border-left: 1px solid #ccc;
+        padding: 12px;
+        overflow-y: auto;
+        font-size: 0.82em;
+        font-family: Georgia, serif;
+    }
+
+    /* =========================
+    TABLE (FAR RIGHT PANEL)
+    ========================= */
+    #table-container {
+        width: 20%;
+        height: 100%;
+        overflow-y: auto;
+        background: #f5f0e8;
+        border-left: 1px solid #ccc;
+        padding: 10px;
+        font-size: 0.9em;
+    }
+
+    /* =========================
+    TABLE STYLING
+    ========================= */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border-bottom: 1px solid #ddd;
+        padding: 4px;
+        text-align: left;
+    }
+
+    th {
+        position: sticky;
+        top: 0;
+        background: #f5f0e8;
+    }
+
+    /* =========================
+    LEGEND / CONTROLS UI
+    ========================= */
+    #controls {
+        padding: 10px 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: #f5f0e8;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #myRange {
+        width: 500px;
+        accent-color: #7a5c2e;
+    }
+
+    #info {
+        font-size: 0.95em;
+        color: #7a5c2e;
+        font-weight: bold;
+    }
+
+    /* =========================
+    POPUP (SPECIES INFO)
+    ========================= */
+    #species-popup {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #f5f0e8;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        z-index: 2000;
+        width: 340px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    #species-popup img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-bottom: 12px;
+    }
+
+    #species-popup h3 {
+        margin: 0 0 2px 0;
+        font-size: 1.1em;
+        color: #3a2a1a;
+    }
+
+    #species-popup .scientific {
+        font-style: italic;
+        font-size: 0.82em;
+        color: #888;
+        margin-bottom: 10px;
+    }
+
+    #species-popup p {
+        font-size: 0.85em;
+        line-height: 1.6;
+        color: #444;
+        margin: 0;
+    }
+
+    #species-popup .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        font-size: 1.2em;
+        cursor: pointer;
+        color: #888;
+        background: none;
+        border: none;
+    }
+
+    /* overlay behind popup */
+    #popup-overlay {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        z-index: 1999;
+    }
+    .leaflet-top,
+    .leaflet-bottom,
+    .leaflet-control {
+        z-index: 500 !important;
+    }
+
+    #climate-legend {
+        z-index: 1000;
+    }
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <h1>Mushroom Movement</h1>
+    <p>
+        Fungi are among the most ecologically diverse organisms on Earth. Fungal communities contribute to nearly every terrestrial ecosystem as decomposers and nutrient cyclers, yet their distributions and responses to climate change are poorly understood compared to plants and animals. This gap is especially clear in the southeastern United States, where high biodiversity and a humid climate foster fungal richness, but long-term observational studies of those communities remain sparse. Fungal sensitivity to temperature and moisture makes these communities useful ecological indicators to reflect the changing global climate. In this map, we visualize fungal occurrence records over the last century for 11 North Carolina species overlaid with temperature change to detect spatial shifts over time.
+    </p>
+</header>
+
+<div id="controls">
+    <label>Year:</label>
+    <input type="range" min="1899" max="2025" value="1899" id="myRange">
+    <span id="info">1899 &nbsp;|&nbsp; 0 records</span>
+</div>
+
+<div id="legend"></div>
+<div id="main">
+
+    <!-- MAP AREA -->
+    <div id="map-wrap">
+        <div id="mapid"></div>
+
+        <!-- climate overlays (now INSIDE map) -->
+        <div id="climate-controls"></div>
+        <div id="climate-legend"></div>
+    </div>
+
+    <!-- RIGHT SIDE: species legend -->
+    <div id="species-controls"></div>
+
+    <!-- FAR RIGHT: table -->
+    <div id="table-container">
+        <h3>Northernmost Latitude</h3>
+        <div id="table"></div>
+    </div>
+
+</div>
+<div id="species-controls"></div>
+<div id="popup-overlay" onclick="closePopup()"></div>
+<div id="species-popup">
+    <button class="close-btn" onclick="closePopup()">✕</button>
+    <img id="popup-img" src="" alt="">
+    <h3 id="popup-common"></h3>
+    <div class="scientific" id="popup-scientific"></div>
+    <p id="popup-desc"></p>
+</div>
+<div id="climate-controls"></div>
+<div id="climate-legend"></div>
+
+
+<script>
+
+//Climate Data
+    var Tmax = [
+        L.tileLayer('tmax/1900tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmax/1920tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmax/1940tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmax/1960tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmax/1980tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmax/2000tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmax/2025tiles/{z}/{x}/{y}.png', {opacity:0})
+    ];
+
+    var Tmean = [
+        L.tileLayer('tmean/1900tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmean/1920tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmean/1940tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmean/1960tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmean/1980tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmean/2000tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('tmean/2025tiles/{z}/{x}/{y}.png', {opacity:0})
+    ];
+
+    var PPT = [
+        L.tileLayer('ppt/1900tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('ppt/1920tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('ppt/1940tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('ppt/1960tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('ppt/1980tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('ppt/2000tiles/{z}/{x}/{y}.png', {opacity:0}),
+        L.tileLayer('ppt/2025tiles/{z}/{x}/{y}.png', {opacity:0})
+    ];
+
+    var climateLayers = {
+        "Mean Temp": Tmean,
+        "Max Temp": Tmax,
+        "Precipitation": PPT
+    };
+
+    var activeClimate = null;
+    var currentIndex = 0;
+
+//Constants
+const speciesConfig = {
+    "Trametes versicolor": {
+        color: "#c07a2f",
+        common: "Turkey Tail",
+        image: "https://fungi.com/cdn/shop/articles/image1_15bd9cc0-b2f9-4cda-a1b2-c1712837456d.jpg?v=1734637386&width=1920",      
+        description: "Saprobic on the deadwood of hardwood trees. Found abundantly in North American woods. There are no know medicinal or edible properties, but is regarded as a symbol of longevity and good fortune in traditional Chinese and Japanese practices." 
+    },
+    "Lactarius indigo": {
+        color: "#3a6fbf",
+        common: "Indigo Milk Cap",
+        image: "https://cdn.shopify.com/s/files/1/0717/5752/9366/files/Lactarius_indigo_Indigo_Milk_Cap.jpg?v=1759467186",
+        description: "Mycorrhizal with oak and pine trees in the southwestern United States. These are edible and sometimes used as a natural dye. "
+    },
+    "Laetiporus sulphureus": {
+        color: "#d4560a",
+        common: "Chicken of the Woods",
+        image: "https://cdn.zmescience.com/wp-content/uploads/2018/08/Laetiporus_sulphureus_JPG01.jpg",
+        description: "Parasitic and saprobic on living or dead hardwoods, especially oak trees, throughout North America. Widely foraged for edible properties."
+    },
+    "Pleurotus ostreatus": {
+        color: "#5aab7a",
+        common: "Oyster Mushroom",
+        image: "https://img.hobbyfarms.com/shutterstock_514306066.jpg",
+        description: "Saprobic on dead hardwoods thoroughout North America. Known to be edible, although some people experience allergic reactions."
+    },
+    "Armillaria mellea": {
+        color: "#9b6bb5",
+        common: "Honey Fungus",
+        image: "https://www.theenglishgarden.co.uk/_gatsby/file/2a8e79accb0d7497d64529414c846a32/shutterstock_2483292729.jpg",
+        description: "Parasitic on hardwoods and conifers, typically in southeastern North America and California. Are edible when cooked thoroughly "
+    },
+   "Cantharellus cibarius": {
+    color: "#c9a800",
+    common: "Golden Chanterelle",
+    image: "https://cdn.shopify.com/s/files/1/0558/2661/2279/files/image-gen_16.png?v=1769679443",
+    description: "Mycorrhizal with hardwoods and conifers throughout temperate North America. Commonly found in mossy forests in summer and fall. Highly prized edible mushroom with a fruity aroma, widely foraged and used in cooking."
+    },
+    "Amanita verna": {
+    color: "#aaaaaa",
+    common: "Destroying Angel",
+    image: "https://upload.wikimedia.org/wikipedia/commons/a/a3/Amanita_bisporigera_17932.jpg",
+    description: "Mycorrhizal with hardwood trees in eastern North America, typically found in summer and fall. Contains potent amatoxins and is among the most poisonous mushrooms known. Ingestion can cause severe liver failure and is often fatal."
+    },
+
+    "Coprinopsis atramentaria": {
+    color: "#555555",
+    common: "Inky Cap",
+    image: "https://preview.redd.it/coprinus-comatus-shaggy-ink-cap-mushroom-drips-thick-black-v0-fg1tr1nlpdi51.jpg?auto=webp&s=ca1210fd64c5799eed9bd93956850561e2e09e1d",
+    description: "Saprobic on disturbed ground, lawns, and urban areas across North America. Often appears in clusters after rain. Edible when young, but reacts dangerously with alcohol, causing flushing and illness."
+    },
+
+    "Panus neostrigosus": {
+    color: "#c4546e",
+    common: "Hairy Oyster Mushroom",
+    image: "https://www.minnesotaseasons.com/Fungi/Large/H/Hairy_Oyster_Mushroom_01.jpg",
+    description: "Saprobic on dead hardwood, especially oak, in eastern North America. Recognized by its hairy cap and tough texture. Not considered edible due to its leathery consistency."
+    },
+
+    "Porodaedalea pini": {
+    color: "#7a4f2e",
+    common: "Pine Conk",
+    image: "https://www.naturallynorthidaho.com/wp-content/uploads/2012/12/Conk-1521.jpg",
+    description: "Parasitic and saprobic on conifers, especially pine, across northern North America. Causes heart rot in living trees and persists on dead wood. Not edible, but plays an important ecological role in forest decomposition."
+    },
+
+    "Calvatia gigantea": {
+    color: "#999999",
+    common: "Giant Puffball",
+    image: "https://images.squarespace-cdn.com/content/v1/510c1493e4b0d7f206ce8b44/1382824507700-A9FCB3IZIXAWX70CU0WW/puffballs++10-12-13.JPG",
+    description: "Saprobic in open fields, meadows, and forest edges throughout North America. Produces large white fruiting bodies in late summer and fall. Edible when young and firm inside, before spores begin to develop."
+    }
+};
+
+const climateYears = [1900,1920,1940,1960,1980,2000,2025];
+
+var activeSpecies = new Set(Object.keys(speciesConfig));
+
+function makeIcon(species) {
+    const cfg = speciesConfig[species] || { color: "#999" };
+    return L.divIcon({
+        className: "",
+        html: `<div style="
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: ${cfg.color};
+            border: 1.5px solid #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        "></div>`,
+        iconAnchor: [6, 6]
+    });
+}
+
+//Pop-up function for each species 
+function openPopup(scientificName) {
+    const cfg = speciesConfig[scientificName];
+    if (!cfg) return;
+    document.getElementById("popup-img").src = cfg.image;
+    document.getElementById("popup-common").textContent = cfg.common;
+    document.getElementById("popup-scientific").textContent = scientificName;
+    document.getElementById("popup-desc").textContent = cfg.description;
+    document.getElementById("species-popup").style.display = "block";
+    document.getElementById("popup-overlay").style.display = "block";
+}
+
+function closePopup() {
+    document.getElementById("species-popup").style.display = "none";
+    document.getElementById("popup-overlay").style.display = "none";
+}
+
+const speciesTotals = {};
+mushroom.features.forEach(function(f) {
+    var sp = f.properties.species;
+    speciesTotals[sp] = (speciesTotals[sp] || 0) + 1;
+});
+
+
+const controlsEl = document.getElementById("species-controls");
+controlsEl.innerHTML = `
+<h4>Species</h4>
+<label class="species-toggle">
+    <input type="checkbox" id="toggle-all" checked>
+    <i>Toggle all</i>
+</label>
+<hr style="margin:4px 0; border-color:#ddd;">
+` + Object.entries(speciesConfig).map(([name, cfg]) => `
+<label class="species-toggle">
+    <input type="checkbox" class="sp-checkbox" data-species="${name}" checked>
+    <span style="display:flex;align-items:center;gap:8px;flex:1;">
+        <div style="
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: ${cfg.color};
+            border: 1.5px solid #aaa;
+            flex-shrink: 0;
+        "></div>
+
+        <span style="flex:1;">
+            ${cfg.common}<br>
+            <span style="font-size:0.78em;color:#888;">
+                ${(speciesTotals[name] || 0).toLocaleString()} total records
+            </span>
+        </span>
+
+        <span onclick="event.preventDefault(); openPopup('${name}')"
+              style="cursor:pointer;color:#7a5c2e;font-size:1em;padding:2px 6px;"
+              title="Learn more">ⓘ</span>
+    </span>
+</label>
+`).join("");
+
+document.getElementById("toggle-all").addEventListener("change", function() {
+    const checked = this.checked;
+    document.querySelectorAll(".sp-checkbox").forEach(cb => {
+        cb.checked = checked;
+        if (checked) activeSpecies.add(cb.dataset.species);
+        else activeSpecies.delete(cb.dataset.species);
+    });
+    renderMap();
+});
+
+document.querySelectorAll(".sp-checkbox").forEach(cb => {
+    cb.addEventListener("change", function() {
+        if (this.checked) activeSpecies.add(this.dataset.species);
+        else activeSpecies.delete(this.dataset.species);
+
+        const all = document.querySelectorAll(".sp-checkbox");
+        const allChecked = [...all].every(c => c.checked);
+        const noneChecked = [...all].every(c => !c.checked);
+        document.getElementById("toggle-all").indeterminate = !allChecked && !noneChecked;
+        document.getElementById("toggle-all").checked = allChecked;
+
+        renderMap();
+    });
+});
+
+
+// Main Map
+var map = L.map('mapid').setView([33.5, -84.0], 5);
+
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+}).addTo(map);
+
+var mushroomLayer = L.markerClusterGroup({
+    maxClusterRadius: 40,
+    iconCreateFunction: function(cluster) {
+        var count = cluster.getChildCount();
+        var size = count < 10 ? 30 : count < 100 ? 38 : 46;
+        return L.divIcon({
+            html: `<div style="
+                background: #c07a2f;
+                color: white;
+                border-radius: 50%;
+                width: ${size}px;
+                height: ${size}px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: Georgia, serif;
+                font-size: 0.8em;
+                border: 2px solid #fff;
+                box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            ">${count}</div>`,
+            className: "",
+            iconSize: [size, size]
+        });
+    }
+}).addTo(map);
+
+var slider  = document.getElementById("myRange");
+var info    = document.getElementById("info");
+var currentYear = 1899;
+
+function renderMap() {
+    var filtered = mushroom.features.filter(function(f) {
+        return parseInt(f.properties.year) === currentYear &&
+               activeSpecies.has(f.properties.species);
+    });
+
+    info.textContent = currentYear + " \u00a0|\u00a0 " + filtered.length + " records";
+
+    map.removeLayer(mushroomLayer);
+
+    if (filtered.length > 200 && activeSpecies.size > 1) {
+        mushroomLayer = L.markerClusterGroup({
+            maxClusterRadius: 40,
+            iconCreateFunction: function(cluster) {
+                var count = cluster.getChildCount();
+                var size = count < 10 ? 30 : count < 100 ? 38 : 46;
+
+                return L.divIcon({
+                    html: `<div style="
+                        background: #c07a2f;
+                        color: white;
+                        border-radius: 50%;
+                        width: ${size}px;
+                        height: ${size}px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: Georgia, serif;
+                        font-size: 0.8em;
+                        border: 2px solid #fff;
+                        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+                    ">${count}</div>`,
+                    className: "",
+                    iconSize: [size, size]
+                });
+            }
+        });
+    } else {
+        mushroomLayer = L.layerGroup();
+    }
+
+    mushroomLayer.addTo(map);
+
+    filtered.forEach(function(f) {
+        var coords = f.geometry.coordinates;
+        var props  = f.properties;
+        L.marker([coords[1], coords[0]], { icon: makeIcon(props.species) })
+         .bindPopup(`
+            <b>${speciesConfig[props.species]?.common || props.species}</b><br>
+            <i style="font-size:0.85em;color:#888;">${props.species}</i><br>
+            Year: ${props.year}<br>
+            ${props.stateProvince}
+         `)
+         .addTo(mushroomLayer);
+    });
+
+    return filtered;
+}
+
+//Mushroom Toggle Control
+var mushroomVisible = true;
+
+var mushroomControl = L.control({ position: 'topright' });
+
+mushroomControl.onAdd = function() {
+    var div = L.DomUtil.create('div', 'info');
+    div.innerHTML = `
+        <label style="background:white;padding:6px;border:1px solid #ccc;">
+            <input type="checkbox" id="toggleMushrooms" checked>
+            Show Mushrooms
+        </label>
+    `;
+    return div;
+};
+
+mushroomControl.addTo(map);
+
+document.addEventListener("change", function(e) {
+    if (e.target.id === "toggleMushrooms") {
+        mushroomVisible = e.target.checked;
+        if (mushroomVisible) map.addLayer(mushroomLayer);
+        else map.removeLayer(mushroomLayer);
+    }
+});
+//Climate Layer Controls
+const climateControlDiv = document.getElementById("climate-controls");
+
+climateControlDiv.innerHTML = `
+    <h4 style="margin:0 0 8px 0;">Climate Layers</h4>
+
+    <label class="climate-btn">
+        <input type="radio" name="climate" value="none" checked>
+        None
+    </label>
+
+    <label class="climate-btn">
+        <input type="radio" name="climate" value="Mean Temp">
+        Mean Temperature
+    </label>
+
+    <label class="climate-btn">
+        <input type="radio" name="climate" value="Max Temp">
+        Max Temperature
+    </label>
+
+    <label class="climate-btn">
+        <input type="radio" name="climate" value="Precipitation">
+        Precipitation
+    </label>
+`;
+
+document.querySelectorAll('input[name="climate"]').forEach(radio => {
+    radio.addEventListener("change", function() {
+
+        // TURN OFF ALL CLIMATE FIRST
+        Object.values(climateLayers).forEach(group => {
+            group.forEach(layer => map.removeLayer(layer));
+        });
+
+        activeClimate = this.value;
+
+        // If "none", stop here
+        if (activeClimate === "none") {
+            buildClimateLegend("");
+            return;
+        }
+
+        // ADD SELECTED CLIMATE LAYERS
+        climateLayers[activeClimate].forEach(layer => {
+            layer.addTo(map);
+        });
+
+        updateClimateLayers();
+
+        if (activeClimate === "Precipitation") {
+            buildClimateLegend(" in.");
+        } else {
+            buildClimateLegend(" °F");
+        }
+    });
+});
+
+
+function updateClimateLayers() {
+    if (!activeClimate || activeClimate === "none") return;
+
+    const idx = climateYears.indexOf(currentYear);
+    if (idx === -1) return;
+
+    climateLayers[activeClimate].forEach((layer, i) => {
+        layer.setOpacity(i === idx ? 1 : 0);
+    });
+}
+
+//Climate Legend
+var colors = [
+"#2b83ba","#4696b5","#61a9b1","#7cbcac","#97cfa7",
+"#afdfa5","#c1e6ab","#d3edb1","#e4f4b6","#f6fbbc",
+"#fff6b5","#fee5a1","#fed48e","#fec37a","#fdb266",
+"#f79656","#ef7748","#e75839","#df382b","#d7191c"
+];
+
+var labels = [
+"0-5","5-10","10-15","15-20","20-25",
+"25-30","30-35","35-40","40-45","45-50",
+"50-55","55-60","60-65","65-70","70-75",
+"75-80","80-85","85-90","90-95","95-100"
+];
+
+function buildClimateLegend(unit) {
+    let div = document.getElementById("climate-legend");
+    div.innerHTML = "<b>Climate Scale</b><br>";
+
+    for (let i = 0; i < colors.length; i++) {
+        div.innerHTML += `
+            <div style="display:flex;align-items:center;gap:6px;">
+                <div style="width:14px;height:14px;background:${colors[i]}"></div>
+                ${labels[i]}${unit}
+            </div>
+        `;
+    }
+}
+
+buildClimateLegend("°F");
+
+//Slider
+slider.oninput = function() {
+    currentYear = parseInt(this.value);
+
+    const filtered = renderMap();
+
+    const northData = getNorthernmostBySpecies(filtered);
+    renderTable(northData);
+
+    updateClimateLayers(); // NEW
+};
+
+window.onload = function() {
+    slider.value = 1899;
+    currentYear = 1899;
+    renderMap();
+};
+
+
+ //Table
+    function getNorthernmostBySpecies(features) {
+        const result = {};
+
+        features.forEach(f => {
+            const species = f.properties.species;
+            const lat = f.geometry.coordinates[1];
+
+            if (!result[species] || lat > result[species]) {
+                result[species] = lat;
+            }
+        });
+
+        return result;
+    }
+
+    function renderTable(northData) {
+    let html = "<table>";
+    html += "<tr><th>Species</th><th>Max Lat (°)</th></tr>";
+
+    Object.entries(northData)
+        .sort((a, b) => b[1] - a[1]) // sort north → south
+        .forEach(([species, lat]) => {
+            html += `<tr>
+                        <td><i>${species}</i></td>
+                        <td>${lat.toFixed(2)}</td>
+                     </tr>`;
+        });
+
+    html += "</table>";
+
+    document.getElementById("table").innerHTML = html;
+}
+</script>
+</body>
+</html>

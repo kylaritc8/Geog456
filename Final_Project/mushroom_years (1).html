@@ -71,6 +71,16 @@
         z-index: 1000;
         font-family: Georgia, serif;
         font-size: 0.85em;
+
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .climate-btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 
     #climate-legend {
@@ -715,10 +725,14 @@ slider.oninput = function() {
 
     const filtered = renderMap();
 
-    const northData = getNorthernmostBySpecies(filtered);
-    renderTable(northData);
+    const northData = updateNorthernTracker(filtered, currentYear);
+        renderTable(northData);
 
-    updateClimateLayers(); // NEW
+    if (this.value < currentYear) {
+        for (let key in northernTracker) delete northernTracker[key];
+    }
+
+    updateClimateLayers(); 
 };
 
 window.onload = function() {
@@ -729,38 +743,42 @@ window.onload = function() {
 
 
  //Table
-    function getNorthernmostBySpecies(features) {
-        const result = {};
+    const northernTracker = {};
 
+    function updateNorthernTracker(features, year) {
         features.forEach(f => {
             const species = f.properties.species;
             const lat = f.geometry.coordinates[1];
 
-            if (!result[species] || lat > result[species]) {
-                result[species] = lat;
+            if (!northernTracker[species] || lat > northernTracker[species].lat) {
+                northernTracker[species] = {
+                    lat: lat,
+                    year: year
+                };
             }
         });
 
-        return result;
+        return northernTracker;
     }
 
     function renderTable(northData) {
-    let html = "<table>";
-    html += "<tr><th>Species</th><th>Max Lat (°)</th></tr>";
+        let html = "<table>";
+        html += "<tr><th>Species</th><th>Max Lat (°)</th><th>Year</th></tr>";
 
-    Object.entries(northData)
-        .sort((a, b) => b[1] - a[1]) // sort north → south
-        .forEach(([species, lat]) => {
-            html += `<tr>
-                        <td><i>${species}</i></td>
-                        <td>${lat.toFixed(2)}</td>
-                     </tr>`;
-        });
+        Object.entries(northData)
+            .sort((a, b) => b[1].lat - a[1].lat)
+            .forEach(([species, data]) => {
+                html += `<tr>
+                            <td><i>${species}</i></td>
+                            <td>${data.lat.toFixed(2)}</td>
+                            <td>${data.year}</td>
+                        </tr>`;
+            });
 
-    html += "</table>";
+        html += "</table>";
 
-    document.getElementById("table").innerHTML = html;
-}
+        document.getElementById("table").innerHTML = html;
+    }
 </script>
 </body>
 </html>

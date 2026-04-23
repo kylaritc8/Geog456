@@ -51,7 +51,7 @@
 
     #map-wrap {
         position: relative;
-        width: 65%;
+        width: 60%;
         height: 100%;
     }
 
@@ -109,7 +109,7 @@
         font-family: Georgia, serif;
     }
     #table-container {
-        width: 20%;
+        width: 25%;
         height: 100%;
         overflow-y: auto;
         background: #f5f0e8;
@@ -135,6 +135,22 @@
         background: #f5f0e8;
     }
 
+    #reset-table-btn {
+        margin-top: 10px;
+        width: 100%;
+        padding: 6px;
+        font-family: Georgia, serif;
+        background: #7a5c2e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    #reset-table-btn:hover {
+        background: #5f4722;
+    }
+
     #controls {
         padding: 10px 24px;
         display: flex;
@@ -157,7 +173,7 @@
 
     #species-popup {
         display: none;
-        position: absolute;
+        position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -210,7 +226,7 @@
     }
     #popup-overlay {
         display: none;
-        position: absolute;
+        position: fixed;
         top: 0;
         left: 0;
         width: 100%;
@@ -261,6 +277,7 @@
     <div id="table-container">
         <h3>Northernmost Latitude</h3>
         <div id="table"></div>
+        <button id="reset-table-btn">Reset Table</button>
     </div>
 
 </div>
@@ -769,7 +786,7 @@ window.onload = function() {
             .sort((a, b) => b[1].lat - a[1].lat)
             .forEach(([species, data]) => {
                 html += `<tr>
-                            <td><i>${species}</i></td>
+                            <td>${speciesConfig[species]?.common || species}</td>
                             <td>${data.lat.toFixed(2)}</td>
                             <td>${data.year}</td>
                         </tr>`;
@@ -779,6 +796,23 @@ window.onload = function() {
 
         document.getElementById("table").innerHTML = html;
     }
+
+    // Reset Button
+    function resetNorthernTracker() {
+        for (let key in northernTracker) {
+            delete northernTracker[key];
+        }
+
+        renderTable(northernTracker);
+    }
+
+    document.getElementById("reset-table-btn").addEventListener("click", function() {
+        for (let key in northernTracker) delete northernTracker[key];
+
+        const filtered = renderMap();
+        const northData = updateNorthernTracker(filtered, currentYear);
+        renderTable(northData);
+    });
 </script>
 </body>
 </html>

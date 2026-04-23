@@ -60,7 +60,6 @@
         height: 100%;
     }
 
-    /* Climate controls (top-left) */
     #climate-controls {
         position: absolute;
         top: 10px;
@@ -74,7 +73,6 @@
         font-size: 0.85em;
     }
 
-    /* Climate legend (bottom-left) */
     #climate-legend {
         position: absolute;
         bottom: 10px;
@@ -89,9 +87,7 @@
         line-height: 1.4;
     }
 
-    /* =========================
-    MUSHROOM LEGEND (RIGHT OF MAP)
-    ========================= */
+ 
     #species-controls {
         width: 15%;
         height: 100%;
@@ -102,10 +98,6 @@
         font-size: 0.82em;
         font-family: Georgia, serif;
     }
-
-    /* =========================
-    TABLE (FAR RIGHT PANEL)
-    ========================= */
     #table-container {
         width: 20%;
         height: 100%;
@@ -116,9 +108,6 @@
         font-size: 0.9em;
     }
 
-    /* =========================
-    TABLE STYLING
-    ========================= */
     table {
         width: 100%;
         border-collapse: collapse;
@@ -136,9 +125,6 @@
         background: #f5f0e8;
     }
 
-    /* =========================
-    LEGEND / CONTROLS UI
-    ========================= */
     #controls {
         padding: 10px 24px;
         display: flex;
@@ -159,9 +145,6 @@
         font-weight: bold;
     }
 
-    /* =========================
-    POPUP (SPECIES INFO)
-    ========================= */
     #species-popup {
         display: none;
         position: absolute;
@@ -215,8 +198,6 @@
         background: none;
         border: none;
     }
-
-    /* overlay behind popup */
     #popup-overlay {
         display: none;
         position: absolute;
@@ -256,19 +237,17 @@
 <div id="legend"></div>
 <div id="main">
 
-    <!-- MAP AREA -->
+    
     <div id="map-wrap">
         <div id="mapid"></div>
-
-        <!-- climate overlays (now INSIDE map) -->
         <div id="climate-controls"></div>
         <div id="climate-legend"></div>
     </div>
 
-    <!-- RIGHT SIDE: species legend -->
+   
     <div id="species-controls"></div>
 
-    <!-- FAR RIGHT: table -->
+   
     <div id="table-container">
         <h3>Northernmost Latitude</h3>
         <div id="table"></div>
@@ -284,8 +263,7 @@
     <div class="scientific" id="popup-scientific"></div>
     <p id="popup-desc"></p>
 </div>
-<div id="climate-controls"></div>
-<div id="climate-legend"></div>
+
 
 
 <script>
